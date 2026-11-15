@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="en"><head><link rel="icon" type="image/jpeg" href="mathxlogo.png.jpg"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chapter | MathX</title><link rel="stylesheet" href="style.css"></head><body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">∑</span>Math<span class="brand-x">X</span></a><nav><a href="index.html">Home</a><a id="boardLink" href="cbse.html">Back to board</a><a class="nav-cta" href="admin.html">Admin preview ↗</a></nav></header>
+<section class="page-hero"><div class="wrap"><div class="crumb"><a href="index.html">Home</a> / <a id="crumbBoard" href="cbse.html">Board</a> / <a id="crumbClass" href="cbse-class8.html">Class</a> / Chapter</div><h1 class="page-title" id="chapterTitle">Chapter</h1><p class="page-subtitle" id="chapterMeta">MathX learning space</p></div></section>
+<main class="wrap"><div class="lesson-layout"><aside class="lesson-nav"><h3>CHAPTER CONTENT</h3><a class="active" href="#intro" onclick="activate(this)">Introduction</a><a href="#formulas" onclick="activate(this)">Formulas</a><a href="#practice" onclick="activate(this)">Practice questions</a><a href="#solver" onclick="activate(this)">Math Solver</a><a href="#notes" onclick="activate(this)">Notes & Summary</a></aside>
+<div class="lesson-content"><section id="intro"><h2>Introduction & explanation</h2><p>Welcome to your chapter learning space. Start by understanding the core idea, then explore formulas and practise with different question types.</p><div class="info-box">📌 This is the chapter template. Full topic-wise explanations and chapter-specific examples can be added as the MathX content library grows.</div></section>
+<section id="formulas" style="margin-top:32px">
+<h2>Formula library</h2>
+<p>Explore useful properties and open a worked example to see how each one works.</p>
+
+<div class="formula-row">
+  <div>
+    <strong>a × b = b × a</strong>
+    <small>Commutative property of multiplication</small>
+  </div>
+  <button class="small-btn" type="button" onclick="showExample('commutative')">✦ Try this</button>
+</div>
+
+<div class="formula-row">
+  <div>
+    <strong>(a + b) + c = a + (b + c)</strong>
+    <small>Associative property of addition</small>
+  </div>
+  <button class="small-btn" type="button" onclick="showExample('associative')">✦ Try this</button>
+</div>
+
+<div id="formulaResult" class="worked-example" hidden aria-live="polite">
+  <div class="worked-example-top">
+    <span class="example-kicker">✦ WORKED EXAMPLE</span>
+    <button class="example-close" type="button" onclick="hideExample()" aria-label="Close example">×</button>
+  </div>
+  <h3 id="exampleTitle">Let's try it</h3>
+  <div class="example-formula" id="exampleFormula"></div>
+  <ol class="example-steps" id="exampleSteps"></ol>
+  <div class="example-answer">
+    <span>FINAL RESULT</span>
+    <strong id="exampleAnswer"></strong>
+  </div>
+</div>
+<p id="formulaHint" class="formula-hint">Choose “Try this” to open a step-by-step example.</p>
+</section>
+<section id="practice" style="margin-top:32px">
+<h2>Practice questions</h2>
+
+<div class="question">
+  <b>1. Which of these is a rational number?</b>
+  <div class="options">
+    <button class="option" type="button" onclick="mark(this,false)">√2</button>
+    <button class="option" type="button" onclick="mark(this,true)">3/4</button>
+    <button class="option" type="button" onclick="mark(this,false)">π</button>
+    <button class="option" type="button" onclick="mark(this,false)">√3</button>
+  </div>
+  <p class="feedback" aria-live="polite"></p>
+</div>
+
+<div class="question">
+  <b>2. Fill in the blank: 5 + 0 = ____</b>
+  <div class="answer-controls">
+    <input id="fill" class="input-answer" placeholder="Your answer" inputmode="numeric">
+    <button class="small-btn" type="button" onclick="checkFill()">Check answer</button>
+  </div>
+  <p id="fillFeedback" class="feedback" aria-live="polite"></p>
+</div>
+
+<div class="question">
+  <b>3. True or False: Every integer is a rational number.</b>
+  <div class="options">
+    <button class="option" type="button" onclick="mark(this,true)">True</button>
+    <button class="option" type="button" onclick="mark(this,false)">False</button>
+  </div>
+  <p class="feedback" aria-live="polite"></p>
+</div>
+
+<div class="question">
+  <b>4. Word problem</b>
+  <p class="muted">A ribbon is 3/4 metre long. Another ribbon is 1/4 metre long. What is their total length?</p>
+  <div class="answer-controls">
+    <input id="wordAnswer" class="input-answer" placeholder="Write your answer">
+    <button class="small-btn" type="button" onclick="checkWordProblem()">Check answer</button>
+  </div>
+  <p id="wordFeedback" class="feedback" aria-live="polite"></p>
+</div>
+</section>
+<section id="solver" style="margin-top:32px"><h2>Math Solver</h2><p>The step-by-step MathX Solver is planned for a later development stage.</p><div class="info-box">✨ This space is reserved for guided solutions and step-by-step explanations.</div></section>
+<section id="notes" style="margin-top:32px"><h2>Notes & summary</h2><p>Chapter notes, quick revision sheets and PDF resources will be added here.</p><div class="info-box">📄 Notes will eventually be uploaded through the private Admin Portal.</div></section></div></div></main>
+<footer class="footer"><div class="wrap footer-inner"><a class="brand footer-brand" href="index.html"><span class="brand-mark">∑</span>Math<span class="brand-x">X</span></a><span>© 2026 MathX</span><span class="owner-credit" aria-label="Created by Aayus Chaurasiya"><span class="owner-label">CREATED BY</span><span class="owner-name">Aayus Chaurasiya</span></span></div></footer>
+<script>
+const p = new URLSearchParams(location.search);
+const board = (p.get('board') || 'cbse').toLowerCase();
+const cls = p.get('class') || '8';
+const ch = Number(p.get('chapter') || 1);
+
+const boardName = board === 'icse' ? 'ICSE' : 'CBSE / NCERT';
+const names = {
+  cbse: {
+    6: ['Patterns in Mathematics', 'Lines and Angles', 'Number Play', 'Data Handling and Presentation', 'Prime Time', 'Perimeter and Area', 'Fractions', 'Playing with Constructions', 'Symmetry', 'The Other Side of Zero'],
+    7: ['Large Numbers Around Us', 'Arithmetic Expressions', 'A Peek Beyond the Point', 'Expressions using Letter-Numbers', 'Parallel and Intersecting Lines', 'Number Play', 'A Tale of Three Intersecting Lines', 'Working with Fractions', 'Geometric Twins', 'Operations with Integers', 'Finding Common Ground', 'Another Peek Beyond the Point', 'Connecting the Dots', 'Constructions and Tilings', 'Finding the Unknown'],
+    8: ['A Square and A Cube', 'Power Play', 'A Story of Numbers', 'Quadrilaterals', 'Number Play', 'We Distribute, Yet Things Multiply', 'Proportional Reasoning – 1', 'Fractions in Disguise', 'The Baudhayana-Pythagoras Theorem', 'Proportional Reasoning – 2', 'Exploring Some Geometric Themes', 'Tales by Dots and Lines', 'Algebra Play', 'Area']
+  },
+  icse: {
+    6: ['Number System', 'Fractions', 'Decimals', 'Ratio and Proportion', 'Basic Algebra', 'Geometry', 'Mensuration', 'Data Handling'],
+    7: ['Rational Numbers', 'Exponents', 'Algebraic Expressions', 'Linear Equations', 'Percentage', 'Geometry', 'Mensuration', 'Data Handling'],
+    8: ['Rational Numbers', 'Squares and Square Roots', 'Cubes and Cube Roots', 'Playing with Numbers', 'Algebraic Expressions', 'Mensuration', 'Data Handling', 'Direct and Inverse Variation']
+  }
+};
+
+const title = (names[board] && names[board][cls] && names[board][cls][ch - 1]) || 'Maths Chapter';
+document.title = title + ' | MathX';
+document.getElementById('chapterTitle').textContent = title;
+document.getElementById('chapterMeta').textContent = boardName + ' · Class ' + cls + ' · Chapter ' + ch;
+
+const boardFile = board === 'icse' ? 'icse' : 'cbse';
+const classFile = boardFile + '-class' + cls + '.html';
+document.getElementById('boardLink').href = boardFile + '.html';
+document.getElementById('crumbBoard').href = boardFile + '.html';
+document.getElementById('crumbBoard').textContent = boardName;
+document.getElementById('crumbClass').href = classFile;
+document.getElementById('crumbClass').textContent = 'Class ' + cls;
+
+function activate(a) {
+  document.querySelectorAll('.lesson-nav a').forEach(x => x.classList.remove('active'));
+  a.classList.add('active');
+}
+
+const examples = {
+  commutative: {
+    title: 'Commutative property of multiplication',
+    formula: '3 × 5 = 5 × 3',
+    steps: [
+      'Start with the left side: 3 × 5 = 15.',
+      'Now calculate the right side: 5 × 3 = 15.',
+      'Both sides have the same value, so changing the order does not change the product.'
+    ],
+    answer: '15 = 15 · Both sides are equal.'
+  },
+  associative: {
+    title: 'Associative property of addition',
+    formula: '(2 + 3) + 4 = 2 + (3 + 4)',
+    steps: [
+      'Left side: (2 + 3) + 4 = 5 + 4 = 9.',
+      'Right side: 2 + (3 + 4) = 2 + 7 = 9.',
+      'The grouping changes, but the total remains the same.'
+    ],
+    answer: '9 = 9 · Both sides are equal.'
+  }
+};
+
+function showExample(key) {
+  const example = examples[key];
+  if (!example) return;
+
+  document.getElementById('exampleTitle').textContent = example.title;
+  document.getElementById('exampleFormula').textContent = example.formula;
+  document.getElementById('exampleSteps').innerHTML = example.steps
+    .map(step => '<li>' + step + '</li>').join('');
+  document.getElementById('exampleAnswer').textContent = example.answer;
+  document.getElementById('formulaResult').hidden = false;
+  document.getElementById('formulaHint').hidden = true;
+}
+
+function hideExample() {
+  document.getElementById('formulaResult').hidden = true;
+  document.getElementById('formulaHint').hidden = false;
+}
+
+function setFeedback(element, isCorrect, correctText, incorrectText) {
+  element.classList.remove('is-correct', 'is-incorrect');
+  element.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+  element.textContent = isCorrect ? correctText : incorrectText;
+}
+
+function mark(btn, ok) {
+  const question = btn.closest('.question');
+  question.querySelectorAll('.option').forEach(option => {
+    option.classList.remove('is-correct', 'is-incorrect');
+  });
+  btn.classList.add(ok ? 'is-correct' : 'is-incorrect');
+
+  const feedback = question.querySelector('.feedback');
+  setFeedback(
+    feedback,
+    ok,
+    '✓ Correct! Well done.',
+    '✕ Not quite — try again.'
+  );
+}
+
+function checkFill() {
+  const value = document.getElementById('fill').value.trim();
+  const feedback = document.getElementById('fillFeedback');
+  const correct = value === '5';
+  setFeedback(
+    feedback,
+    correct,
+    '✓ Correct! 5 + 0 = 5.',
+    '✕ Try again — adding zero keeps the number unchanged.'
+  );
+}
+
+function checkWordProblem() {
+  const value = document.getElementById('wordAnswer').value
+    .trim()
+    .toLowerCase()
+    .replace(/\\s+/g, ' ');
+  const accepted = ['1', '1 m', '1m', '1 metre', '1 meter', 'one metre', 'one meter', '1 metre long', '1 meter long'];
+  const correct = accepted.includes(value);
+  setFeedback(
+    document.getElementById('wordFeedback'),
+    correct,
+    '✓ Correct! 3/4 + 1/4 = 4/4 = 1 metre.',
+    '✕ Not quite — add the two fractions. The denominators are the same.'
+  );
+}
+</script>
+</body></html>

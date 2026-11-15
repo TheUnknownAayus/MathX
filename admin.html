@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/jpeg" href="mathxlogo.png.jpg">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MathX | Admin Verification</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #090e1c;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .panel {
+      width: min(100%, 400px);
+      padding: 35px;
+      background: #151d30;
+      border: 1px solid #293650;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px #0005;
+    }
+
+    h1 { margin: 0 0 8px; }
+
+    p {
+      color: #aab5ca;
+      line-height: 1.5;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin: 9px 0;
+      border: 1px solid #34415b;
+      border-radius: 8px;
+      background: #0d1527;
+      color: white;
+      outline: none;
+    }
+
+    input:focus { border-color: #818cf8; }
+
+    button, .home-link {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      margin-top: 14px;
+      border: 0;
+      border-radius: 8px;
+      background: #6366f1;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+      line-height: 1.5;
+    }
+
+    .hidden { display: none; }
+
+    .denied { color: #f87171; }
+
+    .lock-icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="panel">
+
+    <div id="loginScreen">
+      <h1>∑ MathX</h1>
+      <p>Admin Preview · Restricted Access</p>
+
+      <form id="loginForm">
+        <input
+          id="email"
+          type="email"
+          placeholder="Admin ID / Email"
+          autocomplete="username"
+          required
+        >
+
+        <input
+          id="password"
+          type="password"
+          placeholder="Admin Password"
+          autocomplete="current-password"
+          required
+        >
+
+        <button id="loginButton" type="submit">
+          Verify Admin →
+        </button>
+      </form>
+
+      <div id="message"></div>
+    </div>
+
+    <div id="deniedScreen" class="hidden">
+      <div class="lock-icon">🔒</div>
+      <h1 class="denied">Access Denied</h1>
+      <p>
+        Admin verification failed.
+        This verification attempt has been used.
+      </p>
+      <a class="home-link" href="index.html">
+        Return to MathX
+      </a>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <script>
+    const mainClient = window.mathxSupabase;
+
+    const form = document.getElementById("loginForm");
+    const loginScreen = document.getElementById("loginScreen");
+    const deniedScreen = document.getElementById("deniedScreen");
+    const message = document.getElementById("message");
+    const loginButton = document.getElementById("loginButton");
+
+    const attemptKey = "mathx_admin_gate_attempted";
+    const successKey = "mathx_admin_gate_success";
+
+    function showDenied() {
+      loginScreen.classList.add("hidden");
+      deniedScreen.classList.remove("hidden");
+    }
+
+    function showMessage(text) {
+      message.textContent = text;
+    }
+
+    // A successful verification stays valid for this tab session.
+    if (sessionStorage.getItem(successKey) === "yes") {
+      window.location.replace("mathx_admin_studio.html");
+    }
+
+    // Do not allow another attempt in the same tab session.
+    if (sessionStorage.getItem(attemptKey) === "yes") {
+      showDenied();
+    }
+
+    form.addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      if (sessionStorage.getItem(attemptKey) === "yes") {
+        showDenied();
+        return;
+      }
+
+      if (!mainClient) {
+        showMessage("Supabase configuration not found.");
+        return;
+      }
+
+      // Lock the attempt before checking credentials.
+      sessionStorage.setItem(attemptKey, "yes");
+
+      loginButton.disabled = true;
+      loginButton.textContent = "Verifying...";
+      showMessage("Checking admin credentials...");
+
+      let gateClient;
+
+      try {
+        gateClient = window.supabase.createClient(
+  window.mathxSupabaseConfig.url,
+  window.mathxSupabaseConfig.key,
+          {
+            auth: {
+              persistSession: false,
+              autoRefreshToken: false,
+              detectSessionInUrl: false,
+              storageKey: "mathx_admin_gate_auth"
+            }
+          }
+        );
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        const { data, error } = await gateClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error || !data.user) {
+          throw new Error("Verification failed.");
+        }
+
+        // End the temporary gate session.
+        await gateClient.auth.signOut();
+
+        // Remember successful verification for this tab.
+        sessionStorage.setItem(successKey, "yes");
+
+        // Open the real Admin Studio.
+        window.location.replace("mathx_admin_studio.html");
+
+      } catch (error) {
+        showDenied();
+
+      } finally {
+        if (gateClient) {
+          try {
+            await gateClient.auth.signOut();
+          } catch (e) {}
+        }
+      }
+    });
+  </script>
+</body>
+</html>

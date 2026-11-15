@@ -1,0 +1,438 @@
+<!-- ==================== PART 1 START ==================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/jpeg" href="mathxlogo.png.jpg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathX — Admin Studio</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+:root{--bg:#080d1a;--panel:#10182a;--panel2:#141f35;--line:rgba(164,183,225,.13);--muted:#91a0bd;--text:#edf2ff;--purple:#8b5cf6;--blue:#4385ff;--cyan:#31c8dc;--green:#35d39a;--red:#ff6b83;--amber:#f5bd58;--shadow:0 18px 55px rgba(0,0,0,.25)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 80% -15%,rgba(93,75,190,.18),transparent 36%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:none}
+.app.authenticated{display:block}
+.sidebar{position:fixed;inset:0 auto 0 0;width:252px;padding:24px 16px;background:rgba(10,16,30,.94);border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:10;backdrop-filter:blur(18px)}
+.brand{display:flex;align-items:center;gap:12px;padding:2px 10px 28px}
+.brandmark{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,var(--purple),var(--blue) 65%,var(--cyan));display:grid;place-items:center;font-size:20px;font-weight:800;box-shadow:0 8px 25px #624be54a}
+.brand strong{font-size:18px;letter-spacing:.2px}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.7px;text-transform:uppercase}
+.nav-label{color:#647391;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:13px 12px 8px}
+.nav{display:grid;gap:5px}
+.nav button{border:0;background:transparent;color:#9eacc7;text-align:left;padding:11px 12px;border-radius:11px;display:flex;align-items:center;gap:12px;transition:.2s}
+.nav button:hover{background:#18243b;color:white}
+.nav button.active{background:linear-gradient(100deg,#7049dc33,#3478ed24);color:#fff;box-shadow:inset 0 0 0 1px #8065f044}
+.nav .ico{width:20px;text-align:center;font-size:16px}
+.side-bottom{margin-top:auto;padding:14px 10px 2px}
+.local-note{background:#111d31;border:1px solid var(--line);padding:12px;border-radius:12px;color:var(--muted);font-size:11px}
+.local-note b{color:#dce7ff;display:block;margin-bottom:4px}
+.main{margin-left:252px;min-height:100vh}
+.topbar{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 34px;background:#0b1221b8;backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}
+.crumb{color:var(--muted);font-size:12px}
+.crumb b{color:#fff}
+.top-actions{display:flex;gap:10px;align-items:center}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#7655dc,#258fc5);font-weight:800}
+.content{padding:30px 34px 60px;max-width:1500px;margin:auto}
+.page-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:25px}
+.eyebrow{color:#8f9fbe;text-transform:uppercase;letter-spacing:1.7px;font-size:10px;font-weight:800}
+.page-head h1{font-size:27px;letter-spacing:-.7px;margin:5px 0}
+.page-head p{color:var(--muted);margin:0;max-width:650px}
+.btn{border:1px solid var(--line);background:#17233a;color:#eaf0ff;border-radius:10px;padding:9px 14px;font-weight:650;transition:.2s}
+.btn:hover{transform:translateY(-1px);border-color:#657aa7;background:#1d2d49}
+.btn.primary{border:0;background:linear-gradient(110deg,#7650e6,#397be9);box-shadow:0 8px 20px #4e66dc33}
+.btn.ghost{background:transparent}
+.btn.danger{color:#ff9aaa;background:#321a2a;border-color:#723149}
+.btn.small{padding:6px 10px;font-size:12px}
+.grid{display:grid;gap:16px}
+.stats{grid-template-columns:repeat(6,minmax(0,1fr));margin-bottom:18px}
+.card{background:linear-gradient(145deg,rgba(20,31,53,.96),rgba(14,23,40,.96));border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.stat{position:relative;overflow:hidden}
+.stat:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:var(--glow,#7650e6);filter:blur(45px);opacity:.22;right:-25px;top:-35px}
+.stat-top{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+.stat-num{font-size:29px;font-weight:800;letter-spacing:-1px;margin:12px 0 3px}
+.stat-foot{font-size:11px;color:#7f91b1}
+.stat-icon{width:30px;height:30px;border-radius:9px;background:#ffffff0c;display:grid;place-items:center}
+.two-col{grid-template-columns:1.35fr 1fr}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title h3{font-size:15px;margin:0}
+.section-title span{font-size:11px;color:var(--muted)}
+.activity{display:grid;gap:15px}
+.activity-item{display:flex;gap:12px;align-items:flex-start}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);margin-top:6px;box-shadow:0 0 12px #31c8dc88}
+.activity-item p{margin:0;color:#dce5f8;font-size:12px}
+.activity-item small{color:var(--muted);font-size:10px}
+.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.quick button{min-height:76px;text-align:left;border:1px solid var(--line);background:#111d32;border-radius:12px;padding:13px;color:#e7edff}
+.quick button:hover{border-color:#6b61d8;background:#192744}
+.quick strong{display:block;margin-top:7px;font-size:12px}
+.quick span{font-size:18px}
+.barline{height:7px;background:#26334d;border-radius:10px;overflow:hidden;margin:8px 0 13px}
+.barline i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,var(--purple),var(--cyan))}
+.overview-row{display:flex;justify-content:space-between;color:#aab8d2;font-size:12px}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.field{display:grid;gap:6px;margin-bottom:13px}
+.field label{font-size:11px;color:#aab8d2;font-weight:700}
+.field input,.field select,.field textarea,.search{width:100%;background:#0b1425;border:1px solid #2a3854;border-radius:9px;color:#edf2ff;padding:10px 11px;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus,.search:focus{border-color:#7d6af0;box-shadow:0 0 0 3px #7d6af01c}
+.field textarea{min-height:105px;resize:vertical}
+.field select option{background:#10182a}
+.search{max-width:280px;padding:9px 12px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px}
+.data-table{width:100%;border-collapse:collapse;min-width:650px}
+.data-table th{text-align:left;background:#111c30;color:#8394b4;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:12px 14px}
+.data-table td{padding:13px 14px;border-top:1px solid var(--line);font-size:12px;color:#d8e2f7}
+.data-table tr:hover td{background:#ffffff04}
+.muted{color:var(--muted)!important}
+.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:20px;font-size:10px;font-weight:750;background:#26334a;color:#b8c7e4}
+.badge.published{background:#12372f;color:#64e4b2}
+.badge.draft{background:#3a2c19;color:#f4c16c}
+.badge.archived{background:#30374a;color:#aeb9d0}
+.actions{display:flex;gap:6px}
+.empty{text-align:center;padding:38px 20px;color:var(--muted)}
+.empty .empty-icon{font-size:28px;margin-bottom:8px}
+.empty b{display:block;color:#e5edff;margin-bottom:4px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.symbolbar{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 10px}
+.symbolbar button{border:1px solid #354360;background:#18243a;color:#dce7ff;border-radius:7px;padding:5px 9px}
+.symbolbar button:hover{background:#5141a0}
+.modal-backdrop{position:fixed;inset:0;background:#020611b9;display:none;align-items:center;justify-content:center;padding:18px;z-index:30}
+.modal-backdrop.show{display:flex}
+.modal{width:min(620px,100%);max-height:90vh;overflow:auto;background:#111b2e;border:1px solid #354361;border-radius:18px;padding:22px;box-shadow:0 30px 90px #0009}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h2{margin:0;font-size:18px}
+.close{border:0;background:#26344e;color:#dce6fb;border-radius:8px;width:30px;height:30px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.toast-area{position:fixed;right:20px;top:88px;z-index:50;display:grid;gap:8px}
+.toast{padding:12px 16px;border-radius:10px;background:#15362f;border:1px solid #2c8d70;color:#9af0ce;box-shadow:var(--shadow);animation:in .2s ease}
+.toast.error{background:#3b1d2a;border-color:#8b3b54;color:#ffb1c1}
+@keyframes in{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:none}}
+.file-drop{border:1px dashed #536587;border-radius:12px;padding:22px;text-align:center;background:#0d1728;color:var(--muted)}
+.file-drop input{max-width:230px;margin-top:12px}
+.preview-box{background:#0a1323;border:1px solid var(--line);border-radius:10px;padding:13px;color:#b8c8e6;font-size:12px}
+.mobile-menu{display:none}
+.hide{display:none!important}
+.footer-note{color:#7182a2;font-size:11px;margin-top:16px}
+.mobile-overlay{display:none}
+
+/* LOGIN SCREEN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(ellipse at 50% 0%,rgba(110,75,220,.24),transparent 48%),var(--bg)}
+.login-card{width:min(430px,100%);padding:34px;background:linear-gradient(145deg,#141f35,#0e1728);border:1px solid rgba(164,183,225,.18);border-radius:20px;box-shadow:0 25px 90px #0008}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.login-brand .brandmark{width:46px;height:46px}
+.login-brand strong{font-size:21px}
+.login-brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.7px;text-transform:uppercase}
+.login-card h1{font-size:26px;margin:7px 0}
+.login-card>p{color:var(--muted);margin:0 0 25px}
+.login-card .field{margin-bottom:17px}
+.login-card .field input{padding:13px}
+.login-card .btn{width:100%;padding:12px;margin-top:5px}
+.login-error{color:#ff9aaa;font-size:12px;min-height:18px;margin:0 0 8px}
+.login-foot{text-align:center;color:#7182a2;font-size:10px;margin-top:22px}
+.login-lock{text-align:center;color:#8294b5;font-size:11px;margin-top:13px}
+@media(max-width:1150px){.stats{grid-template-columns:repeat(3,1fr)}.two-col{grid-template-columns:1fr}}
+@media(max-width:760px){.sidebar{transform:translateX(-100%);transition:.25s;width:260px}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.topbar{padding:0 16px;height:64px}.content{padding:22px 16px 45px}.mobile-menu{display:inline-flex}.page-head{display:block}.page-head .btn{margin-top:15px}.stats{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.top-actions .export-top{display:none}.mobile-overlay.show{display:block;position:fixed;inset:0;background:#0008;z-index:8}}
+@media(max-width:390px){.stats{grid-template-columns:1fr 1fr}.stat-num{font-size:24px}.quick{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+ <div class="login-card">
+  <div class="login-brand">
+   <div class="brandmark">∑</div>
+   <div><strong>MathX</strong><small>Private Admin Studio</small></div>
+  </div>
+  <div class="eyebrow">OWNER ACCESS</div>
+  <h1>Welcome back</h1>
+  <p>Sign in to access your private MathX workspace.</p>
+  <form id="loginForm">
+   <div class="field">
+    <label for="loginEmail">ADMIN EMAIL</label>
+    <input id="loginEmail" type="email" placeholder="Enter your admin email" autocomplete="username" required>
+   </div>
+   <div class="field">
+    <label for="loginPassword">PASSWORD</label>
+    <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+   </div>
+   <div class="login-error" id="loginError" role="alert"></div>
+   <button class="btn primary" id="loginButton" type="submit">Sign in to Admin Studio →</button>
+  </form>
+  <div class="login-lock">🔒 Protected by Supabase Authentication</div>
+  <div class="login-foot">MATHX · PRIVATE OWNER WORKSPACE</div>
+ </div>
+</div>
+
+<div class="app" id="adminApp">
+<aside class="sidebar" id="sidebar">
+ <div class="brand"><div class="brandmark">∑</div><div><strong>MathX</strong><small>Admin Studio</small></div></div>
+ <div class="nav-label">WORKSPACE</div>
+ <nav class="nav" id="nav">
+  <button class="active" data-view="overview"><span class="ico">▦</span>Overview</button>
+  <button data-view="classes"><span class="ico">▤</span>Classes & Chapters</button>
+  <button data-view="topics"><span class="ico">▧</span>Topic Manager</button>
+  <button data-view="formulas"><span class="ico">ƒ</span>Formula Editor</button>
+  <button data-view="questions"><span class="ico">☷</span>Practice Questions</button>
+  <button data-view="notes"><span class="ico">▱</span>Notes & Media</button>
+  <button data-view="solver"><span class="ico">⌘</span>Math Solver</button>
+ </nav>
+ <div class="nav-label">SYSTEM</div>
+ <nav class="nav"><button data-view="settings"><span class="ico">⚙</span>Data & Settings</button></nav>
+ <div class="side-bottom"><div class="local-note"><b>◉ Private admin mode</b>Admin access is verified through Supabase. Content is currently stored in this browser.</div></div>
+</aside>
+<div class="mobile-overlay" id="overlay"></div>
+<main class="main">
+ <header class="topbar">
+  <div style="display:flex;align-items:center;gap:13px">
+   <button class="btn ghost mobile-menu" id="menuBtn">☰</button>
+   <div class="crumb">MathX / <b id="crumb">Overview</b></div>
+  </div>
+  <div class="top-actions">
+   <button class="btn small export-top" id="exportTop">↓ Export JSON</button>
+   <button class="btn small" id="logoutButton" type="button">Logout ↗</button>
+   <span class="badge published">Admin</span>
+   <div class="avatar">M</div>
+  </div>
+ </header>
+ <div class="content" id="viewRoot"></div>
+</main>
+</div>
+<div class="modal-backdrop" id="modalBackdrop"><div class="modal"><div class="modal-head"><h2 id="modalTitle">Add item</h2><button class="close" id="modalClose">✕</button></div><div id="modalBody"></div><div class="modal-actions" id="modalActions"></div></div></div>
+<div class="toast-area" id="toastArea"></div>
+
+<!-- ==================== PART 2 START ==================== -->
+<script>
+const KEY='mathx_admin_studio_v1';
+const seed={classes:[{id:'c1',board:'CBSE / NCERT',name:'Class 6'},{id:'c2',board:'CBSE / NCERT',name:'Class 7'},{id:'c3',board:'CBSE / NCERT',name:'Class 8'},{id:'c4',board:'ICSE',name:'Class 6'},{id:'c5',board:'ICSE',name:'Class 7'},{id:'c6',board:'ICSE',name:'Class 8'}],chapters:[],topics:[],formulas:[],questions:[],files:[],solver:[],activity:[]};
+let db=loadDB(),currentView='overview',editing=null,selectedFile=null;
+
+function loadDB(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.classes?x:structuredClone(seed)}catch(e){return structuredClone(seed)}}
+function saveDB(){try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch(e){toast('Could not save. Browser storage may be full.','error');return false}}
+function id(){return 'mx_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(msg,type='ok'){const el=document.createElement('div');el.className='toast '+(type==='error'?'error':'');el.textContent=msg;document.getElementById('toastArea').append(el);setTimeout(()=>el.remove(),3200)}
+function log(action,detail){db.activity.unshift({id:id(),action,detail,time:new Date().toLocaleString()});db.activity=db.activity.slice(0,12);saveDB()}
+function countAll(){return {classes:db.classes.length,chapters:db.chapters.length,topics:db.topics.length,formulas:db.formulas.length,questions:db.questions.length,notes:db.files.length}}
+
+function setView(view){currentView=view;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));document.getElementById('crumb').textContent=({overview:'Overview',classes:'Classes & Chapters',topics:'Topic Manager',formulas:'Formula Editor',questions:'Practice Questions',notes:'Notes & Media',solver:'Math Solver',settings:'Data & Settings'})[view]||view;document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');render()}
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)setView(b.dataset.view)});
+document.querySelector('[data-view="settings"]').addEventListener('click',()=>setView('settings'));
+document.getElementById('menuBtn').onclick=()=>{document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')};
+document.getElementById('overlay').onclick=()=>{document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')};
+document.getElementById('exportTop').onclick=exportJSON;
+document.getElementById('modalClose').onclick=closeModal;
+document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
+
+function header(kicker,title,desc,button=''){return `<div class="page-head"><div><div class="eyebrow">${kicker}</div><h1>${title}</h1><p>${desc}</p></div>${button}</div>`}
+function render(){const root=document.getElementById('viewRoot');const fn={overview:overview,classes:classesView,topics:topicsView,formulas:formulasView,questions:questionsView,notes:notesView,solver:solverView,settings:settingsView}[currentView];root.innerHTML=fn();bindView()}
+
+function overview(){const c=countAll(),max=Math.max(1,c.chapters,c.topics,c.formulas,c.questions,c.notes);return header('YOUR CONTENT AT A GLANCE','Good evening, MathX team','A clear snapshot of your Maths learning content and what needs attention.','<button class="btn primary" onclick="openCreateMenu()">＋ Create content</button>')+`
+<div class="grid stats">${[['Classes',c.classes,'▤','#8b5cf6'],['Chapters',c.chapters,'▦','#4385ff'],['Topics',c.topics,'▧','#31c8dc'],['Formulas',c.formulas,'ƒ','#a78bfa'],['Questions',c.questions,'☷','#35d39a'],['Notes & files',c.notes,'▱','#f5bd58']].map(a=>`<div class="card stat" style="--glow:${a[3]}"><div class="stat-top">${a[0]}<span class="stat-icon">${a[2]}</span></div><div class="stat-num">${a[1]}</div><div class="stat-foot">Saved in this browser</div></div>`).join('')}</div>
+<div class="grid two-col"><div class="card"><div class="section-title"><h3>Content overview</h3><span>Current library</span></div>${[['Chapters',c.chapters],['Topics',c.topics],['Formulas',c.formulas],['Practice questions',c.questions],['Notes & media',c.notes]].map(a=>`<div class="overview-row"><span>${a[0]}</span><b>${a[1]}</b></div><div class="barline"><i style="width:${Math.min(100,a[1]/max*100)}%"></i></div>`).join('')}<div class="footer-note">Progress bars reflect relative item counts, not completion scores.</div></div>
+<div class="card"><div class="section-title"><h3>Quick actions</h3><span>Jump into work</span></div><div class="quick"><button onclick="openModal('chapter')"><span>＋</span><strong>Add a chapter</strong></button><button onclick="openModal('topic')"><span>✎</span><strong>Write a topic</strong></button><button onclick="openModal('formula')"><span>ƒ</span><strong>Add a formula</strong></button><button onclick="openModal('question')"><span>☷</span><strong>Create a question</strong></button></div></div></div>
+<div class="card" style="margin-top:16px"><div class="section-title"><h3>Recent activity</h3><span>Latest changes</span></div>${db.activity.length?`<div class="activity">${db.activity.slice(0,6).map(a=>`<div class="activity-item"><span class="dot"></span><div><p><b>${esc(a.action)}</b> — ${esc(a.detail)}</p><small>${esc(a.time)}</small></div></div>`).join('')}</div>`:`<div class="empty"><div class="empty-icon">◷</div><b>No activity yet</b>Your saved changes will appear here.</div>`}</div>`}
+
+function boardSelect(v='CBSE / NCERT'){return `<option ${v==='CBSE / NCERT'?'selected':''}>CBSE / NCERT</option><option ${v==='ICSE'?'selected':''}>ICSE</option>`}
+function classSelect(v=''){return `<option value="">Select class</option>${db.classes.map(x=>`<option value="${x.id}" ${x.id===v?'selected':''}>${esc(x.board)} · ${esc(x.name)}</option>`).join('')}`}
+function chapterSelect(v=''){return `<option value="">Select chapter</option>${db.chapters.map(x=>`<option value="${x.id}" ${x.id===v?'selected':''}>${esc(classLabel(x.classId))} · ${esc(x.name)}</option>`).join('')}`}
+function classLabel(cid){const c=db.classes.find(x=>x.id===cid);return c?c.board+' · '+c.name:'Unassigned'}
+function chapterLabel(cid){const c=db.chapters.find(x=>x.id===cid);return c?c.name:'Unassigned'}
+function empty(title,desc){return `<div class="empty"><div class="empty-icon">◇</div><b>${title}</b>${desc}</div>`}
+function table(headers,rows){return `<div class="table-wrap"><table class="data-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows||''}</tbody></table></div>`}
+
+function classesView(){const rows=db.classes.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.board)}</td><td>${db.chapters.filter(x=>x.classId===c.id).length} chapters</td><td><div class="actions"><button class="btn small" onclick="editItem('class','${c.id}')">Edit</button><button class="btn small danger" onclick="deleteItem('class','${c.id}')">Delete</button></div></td></tr>`).join('');const chapters=db.chapters.map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(classLabel(c.classId))}</td><td><span class="badge ${c.status==='Published'?'published':'draft'}">${c.status||'Draft'}</span></td><td><div class="actions"><button class="btn small" onclick="editItem('chapter','${c.id}')">Edit</button><button class="btn small danger" onclick="deleteItem('chapter','${c.id}')">Delete</button></div></td></tr>`).join('');return header('STRUCTURE YOUR CURRICULUM','Classes & Chapters','Manage the two boards, class levels and chapter structure.','<button class="btn primary" onclick="openModal(\'class\')">＋ Add class</button>')+`<div class="card" style="margin-bottom:16px"><div class="section-title"><h3>Classes</h3><span>${db.classes.length} total</span></div>${rows?table(['Class','Board','Chapters','Actions'],rows):empty('No classes found','Add a class to begin.')}</div><div class="card"><div class="section-title"><h3>Chapters</h3><button class="btn small primary" onclick="openModal('chapter')">＋ Add chapter</button></div>${chapters?table(['Chapter','Board · Class','Status','Actions'],chapters):empty('No chapters yet','Create a chapter and assign it to a board and class.')}</div>`}
+
+function topicsView(){const rows=db.topics.map(x=>`<tr><td><b>${esc(x.name)}</b><div class="muted">${esc((x.explanation||'').slice(0,90))}${(x.explanation||'').length>90?'…':''}</div></td><td>${esc(classLabel(db.chapters.find(c=>c.id===x.chapterId)?.classId))}</td><td>${esc(chapterLabel(x.chapterId))}</td><td><span class="badge ${x.status==='Published'?'published':'draft'}">${x.status||'Draft'}</span></td><td><div class="actions"><button class="btn small" onclick="editItem('topic','${x.id}')">Edit</button><button class="btn small danger" onclick="deleteItem('topic','${x.id}')">Delete</button></div></td></tr>`).join('');return header('LESSON CONTENT','Topic Manager','Write simple explanations and organise learning topics inside chapters.','<button class="btn primary" onclick="openModal(\'topic\')">＋ Add topic</button>')+`<div class="card">${rows?table(['Topic','Board · Class','Chapter','Status','Actions'],rows):empty('Your topic library is empty','Add your first explanation topic.')}</div>`}
+
+function formulasView(){const rows=db.formulas.map(x=>`<tr><td><b>${esc(x.name)}</b><div class="muted" style="font-size:16px">${esc(x.equation)}</div></td><td>${esc(classLabel(db.chapters.find(c=>c.id===x.chapterId)?.classId))}</td><td>${esc(chapterLabel(x.chapterId))}</td><td><span class="badge ${x.status==='Published'?'published':'draft'}">${x.status||'Draft'}</span></td><td><div class="actions"><button class="btn small" onclick="editItem('formula','${x.id}')">Edit</button><button class="btn small danger" onclick="deleteItem('formula','${x.id}')">Delete</button></div></td></tr>`).join('');return header('MATHEMATICAL REFERENCE','Formula Editor','Build a reusable formula library with readable equations and explanations.','<button class="btn primary" onclick="openModal(\'formula\')">＋ Add formula</button>')+`<div class="card">${rows?table(['Formula / Equation','Board · Class','Chapter','Status','Actions'],rows):empty('No formulas added','Create formula cards for your students.')}</div>`}
+
+function questionsView(){const rows=db.questions.map(x=>`<tr><td><b>${esc(x.type)}</b><div>${esc(x.prompt.slice(0,95))}${x.prompt.length>95?'…':''}</div></td><td>${esc(classLabel(db.chapters.find(c=>c.id===x.chapterId)?.classId))}</td><td>${esc(chapterLabel(x.chapterId))}</td><td><span class="badge ${x.status==='Published'?'published':'draft'}">${x.status||'Draft'}</span></td><td><div class="actions"><button class="btn small" onclick="editItem('question','${x.id}')">Edit</button><button class="btn small danger" onclick="deleteItem('question','${x.id}')">Delete</button></div></td></tr>`).join('');return header('ASSESS UNDERSTANDING','Practice Questions','Create four supported question formats and organise them by curriculum.','<button class="btn primary" onclick="openModal(\'question\')">＋ Add question</button>')+`<div class="card"><div class="toolbar"><span class="badge">MCQ</span><span class="badge">Fill in the blanks</span><span class="badge">True / False</span><span class="badge">Word problem</span></div>${rows?table(['Question','Board · Class','Chapter','Status','Actions'],rows):empty('No practice questions yet','Create MCQs, blanks, true/false or word problems.')}</div>`}
+
+function notesView(){const rows=db.files.map(x=>`<tr><td><b>${esc(x.title)}</b><div class="muted">${esc(x.fileName||'No file selected')}</div></td><td>${esc(classLabel(db.chapters.find(c=>c.id===x.chapterId)?.classId))}</td><td>${esc(chapterLabel(x.chapterId))}</td><td>${x.size||'—'}</td><td><span class="badge">${x.kind||'File record'}</span></td><td><button class="btn small danger" onclick="deleteItem('file','${x.id}')">Delete</button></td></tr>`).join('');return header('LEARNING RESOURCES','Notes & Media','Create file records and preview selected local files. This prototype does not upload to cloud storage.','<button class="btn primary" onclick="openModal(\'file\')">＋ Add file</button>')+`<div class="card"><div class="preview-box" style="margin-bottom:15px">ⓘ <b>Local preview only:</b> selected files are previewed in this session. Only file metadata is stored in localStorage; the actual file is not uploaded or persisted.</div>${rows?table(['Title / File','Board · Class','Chapter','Size','Type','Actions'],rows):empty('No notes or media records','Add a PDF or image file record to your library.')}</div>`}
+
+function solverView(){const rows=db.solver.map(x=>`<tr><td><b>${esc(x.title)}</b><div>${esc(x.prompt)}</div></td><td>${esc(classLabel(db.chapters.find(c=>c.id===x.chapterId)?.classId))}</td><td><span class="badge ${x.status==='Published'?'published':'draft'}">${x.status||'Draft'}</span></td><td><div class="actions"><button class="btn small" onclick="editItem('solver','${x.id}')">Edit</button><button class="btn small danger" onclick="deleteItem('solver','${x.id}')">Delete</button></div></td></tr>`).join('');return header('FUTURE FEATURE WORKSPACE','Math Solver Manager','Prepare solver prompts and answer guidance for a future interactive Math Solver. No symbolic solving engine is included yet.','<button class="btn primary" onclick="openModal(\'solver\')">＋ Add solver item</button>')+`<div class="card"><div class="preview-box" style="margin-bottom:15px">◈ Solver engine status: <b>Not connected</b> · This manager stores question concepts and guidance only.</div>${rows?table(['Solver item','Board · Class','Status','Actions'],rows):empty('No solver items prepared','Add sample prompts and guidance for future development.')}</div>`}
+
+function settingsView(){return header('PROTOTYPE CONTROLS','Data & Settings','Manage your browser-stored content and understand the current prototype boundaries.')+`<div class="grid two-col"><div class="card"><div class="section-title"><h3>Data management</h3><span>Local browser</span></div><p class="muted">Your MathX content is stored in this browser profile using localStorage. It does not automatically sync to another device or another admin.</p><div class="toolbar"><button class="btn primary" onclick="exportJSON()">↓ Export JSON</button><button class="btn" onclick="document.getElementById('importFile').click()">↑ Import JSON</button><input id="importFile" type="file" accept=".json,application/json" class="hide"></div><button class="btn danger" onclick="resetData()">Reset all prototype data</button><div class="footer-note">Export regularly to keep a backup. Import replaces the current local dataset.</div></div><div class="card"><div class="section-title"><h3>Production readiness</h3><span class="badge draft">Backend required</span></div><p><b>Not included in this standalone file:</b></p><ul class="muted"><li>Shared cloud database and multi-device sync</li><li>Cloud file storage and delivery</li><li>Publishing content to the public MathX website</li><li>Math Solver calculation engine</li></ul><p class="muted">These require a secure backend, database, storage service and deployment workflow.</p></div></div><div class="card" style="margin-top:16px"><div class="section-title"><h3>Current storage summary</h3><span>Live counts</span></div><div class="grid stats">${Object.entries(countAll()).map(([k,v])=>`<div class="stat"><div class="stat-top">${k}</div><div class="stat-num">${v}</div></div>`).join('')}</div></div>`}
+
+function bindView(){const f=document.getElementById('importFile');if(f)f.onchange=importJSON}
+function openCreateMenu(){openModal('topic')}
+
+function openModal(type,item=null){editing=item?{type,id:item.id}:null;const isEdit=!!item;document.getElementById('modalTitle').textContent=(isEdit?'Edit ':'Add ')+({class:'class',chapter:'chapter',topic:'topic',formula:'formula',question:'practice question',file:'notes / media record',solver:'solver item'}[type]||type);const val=(k,d='')=>esc(item?.[k]??d);let body='';
+if(type==='class')body=`<div class="field"><label>Board</label><select id="f_board">${boardSelect(item?.board||'CBSE / NCERT')}</select></div><div class="field"><label>Class name</label><input id="f_name" placeholder="e.g. Class 8" value="${val('name')}"></div>`;
+if(type==='chapter')body=`<div class="field"><label>Class & board</label><select id="f_class">${classSelect(item?.classId||'')}</select></div><div class="field"><label>Chapter name</label><input id="f_name" placeholder="e.g. Linear Equations" value="${val('name')}"></div><div class="field"><label>Content status</label><select id="f_status"><option ${val('status','Draft')==='Draft'?'selected':''}>Draft</option><option ${val('status')==='Published'?'selected':''}>Published</option></select></div>`;
+if(type==='topic')body=`<div class="field"><label>Chapter</label><select id="f_chapter">${chapterSelect(item?.chapterId||'')}</select></div><div class="field"><label>Topic name</label><input id="f_name" value="${val('name')}" placeholder="e.g. What is a rational number?"></div><div class="field"><label>Explanation</label><textarea id="f_explanation" placeholder="Write a simple explanation with examples...">${val('explanation')}</textarea></div><div class="field"><label>Status</label><select id="f_status"><option ${val('status','Draft')==='Draft'?'selected':''}>Draft</option><option ${val('status')==='Published'?'selected':''}>Published</option></select></div>`;
+if(type==='formula')body=`<div class="field"><label>Chapter</label><select id="f_chapter">${chapterSelect(item?.chapterId||'')}</select></div><div class="field"><label>Formula name</label><input id="f_name" value="${val('name')}" placeholder="Area of a rectangle"></div><div class="field"><label>Equation</label><div class="symbolbar">${['√','π','²','³','÷','×','±','≤','≥','∞','¼','½','¾','θ'].map(s=>`<button type="button" onclick="insertSymbol('${s}')">${s}</button>`).join('')}</div><input id="f_equation" value="${val('equation')}" placeholder="A = l × b"></div><div class="field"><label>Explanation</label><textarea id="f_explanation" placeholder="Explain what each symbol means and when to use it...">${val('explanation')}</textarea></div><div class="field"><label>Status</label><select id="f_status"><option ${val('status','Draft')==='Draft'?'selected':''}>Draft</option><option ${val('status')==='Published'?'selected':''}>Published</option></select></div>`;
+if(type==='question')body=`<div class="field"><label>Chapter</label><select id="f_chapter">${chapterSelect(item?.chapterId||'')}</select></div><div class="field"><label>Question type</label><select id="f_type" onchange="questionFields()">${['MCQ','Fill in the blanks','True / False','Word Problem'].map(s=>`<option ${val('type','MCQ')===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>Question prompt</label><textarea id="f_prompt" placeholder="Write the question...">${val('prompt')}</textarea></div><div id="qExtra"></div><div class="field"><label>Status</label><select id="f_status"><option ${val('status','Draft')==='Draft'?'selected':''}>Draft</option><option ${val('status')==='Published'?'selected':''}>Published</option></select></div>`;
+if(type==='file')body=`<div class="field"><label>Chapter</label><select id="f_chapter">${chapterSelect(item?.chapterId||'')}</select></div><div class="field"><label>File title</label><input id="f_title" value="${val('title')}" placeholder="Chapter 1 — Revision Notes"></div><div class="field"><label>Select PDF or image</label><div class="file-drop">Choose a local file for temporary preview<br><input id="f_file" type="file" accept=".pdf,image/*"></div></div><div id="filePreview" class="preview-box">No file selected. The file itself will not be uploaded.</div>`;
+if(type==='solver')body=`<div class="field"><label>Chapter (optional)</label><select id="f_chapter">${chapterSelect(item?.chapterId||'')}</select></div><div class="field"><label>Item title</label><input id="f_title" value="${val('title')}" placeholder="Solve a one-step equation"></div><div class="field"><label>Student prompt</label><textarea id="f_prompt" placeholder="Enter the future solver prompt...">${val('prompt')}</textarea></div><div class="field"><label>Expected method / guidance</label><textarea id="f_guidance" placeholder="Describe the steps the solver should explain...">${val('guidance')}</textarea></div><div class="field"><label>Status</label><select id="f_status"><option ${val('status','Draft')==='Draft'?'selected':''}>Draft</option><option ${val('status')==='Published'?'selected':''}>Published</option></select></div>`;
+document.getElementById('modalBody').innerHTML=body;document.getElementById('modalActions').innerHTML=`<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn small" onclick="previewCurrent()">Preview</button><button class="btn" onclick="saveDraft()">Save Draft</button>${type==='file'?'':`<button class="btn primary" onclick="publishItem()">Publish</button>`}`;
+if(type==='question'){questionFields(item);document.getElementById('f_type').onchange=()=>questionFields()}
+if(type==='file'){document.getElementById('f_file').onchange=previewLocalFile}
+document.getElementById('modalBackdrop').classList.add('show')}
+
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show');editing=null;selectedFile=null}
+function insertSymbol(s){const el=document.getElementById('f_equation');if(!el)return;const a=el.selectionStart,b=el.selectionEnd;el.value=el.value.slice(0,a)+s+el.value.slice(b);el.focus();el.setSelectionRange(a+s.length,a+s.length)}
+
+function questionFields(item=null){const t=document.getElementById('f_type').value;let html='';if(t==='MCQ'){const opts=item?.options||['','','',''];html=`<div class="field"><label>Four answer options</label><div class="split">${[0,1,2,3].map(i=>`<input id="f_opt${i}" placeholder="Option ${i+1}" value="${esc(opts[i]||'')}">`).join('')}</div></div><div class="field"><label>Correct option</label><select id="f_answer">${[0,1,2,3].map(i=>`<option value="${i}" ${Number(item?.answer||0)===i?'selected':''}>Option ${i+1}</option>`).join('')}</select></div>`}
+if(t==='Fill in the blanks'||t==='Word Problem')html=`<div class="field"><label>${t==='Word Problem'?'Expected typed answer':'Correct answer'}</label><input id="f_answer" value="${esc(item?.answer||'')}" placeholder="Enter answer"></div>`;
+if(t==='True / False')html=`<div class="field"><label>Correct answer</label><select id="f_answer"><option ${item?.answer==='True'?'selected':''}>True</option><option ${item?.answer!=='True'?'selected':''}>False</option></select></div>`;
+document.getElementById('qExtra').innerHTML=html}
+
+function previewLocalFile(e){const f=e.target.files[0];if(!f)return;selectedFile=f;const box=document.getElementById('filePreview');box.innerHTML=`<b>${esc(f.name)}</b><br>${(f.size/1024).toFixed(1)} KB · ${esc(f.type||'Unknown type')}<br><span class="muted">Temporary local selection — not uploaded.</span>`;if(f.type.startsWith('image/')){const r=new FileReader();r.onload=()=>box.innerHTML+=`<br><img src="${r.result}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:10px">`;r.readAsDataURL(f)}else if(f.type==='application/pdf')box.innerHTML+=`<br><span class="badge">PDF selected · preview not embedded</span>`}
+
+function collect(type,status){const g=id=>document.getElementById(id);const get=id=>g(id)?.value?.trim()||'';let x={id:editing?.id||id(),status};
+if(type==='class'){x.board=get('f_board');x.name=get('f_name')}
+if(type==='chapter'){x.classId=get('f_class');x.name=get('f_name')}
+if(type==='topic'){x.chapterId=get('f_chapter');x.name=get('f_name');x.explanation=get('f_explanation')}
+if(type==='formula'){x.chapterId=get('f_chapter');x.name=get('f_name');x.equation=get('f_equation');x.explanation=get('f_explanation')}
+if(type==='question'){x.chapterId=get('f_chapter');x.type=get('f_type');x.prompt=get('f_prompt');x.answer=get('f_answer');if(x.type==='MCQ') {x.options=[0,1,2,3].map(i=>get('f_opt'+i));x.answer=Number(x.answer)}}
+if(type==='file'){x.chapterId=get('f_chapter');x.title=get('f_title');x.fileName=selectedFile?.name||editing?.fileName||'No file selected';x.size=selectedFile?(selectedFile.size/1024).toFixed(1)+' KB':editing?.size||'—';x.kind=selectedFile?.type?.startsWith('image/')?'Image':selectedFile?.type==='application/pdf'?'PDF':editing?.kind||'File record'}
+if(type==='solver'){x.chapterId=get('f_chapter');x.title=get('f_title');x.prompt=get('f_prompt');x.guidance=get('f_guidance')}
+return x}
+
+function previewCurrent(){const type=editing?.type||inferType();const x=collect(type,'Draft');const title=x.name||x.title||x.prompt||'MathX preview';const parts=[['Name / title',title],['Equation',x.equation],['Question',x.prompt],['Explanation',x.explanation],['Answer',typeof x.answer==='number'?'Option '+(x.answer+1):x.answer],['Guidance',x.guidance],['Options',(x.options||[]).join(' · ')],['Curriculum',x.chapterId?classLabel(db.chapters.find(c=>c.id===x.chapterId)?.classId)+' / '+chapterLabel(x.chapterId):x.board||'']].filter(p=>p[1]);const win=window.open('','_blank');if(!win){toast('Allow pop-ups to open the preview.','error');return}win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>MathX Preview</title><style>body{font:16px/1.6 system-ui;background:#0b1221;color:#edf2ff;padding:32px;max-width:760px;margin:auto}.card{background:#141f35;border:1px solid #34425f;border-radius:16px;padding:24px}h1{font-size:26px}small{color:#9aabc8;text-transform:uppercase;letter-spacing:1px}</style></head><body><small>MathX · Content preview · Not published</small><div class="card"><h1>'+esc(title)+'</h1>'+parts.slice(1).map(p=>'<p><b>'+esc(p[0])+'</b><br>'+esc(String(p[1])).replace(/\n/g,'<br>')+'</p>').join('')+'</div></body></html>');win.document.close()}
+
+function saveDraft(){saveItem('Draft')}
+function publishItem(){saveItem('Published')}
+
+function saveItem(status){const type=editing?.type||({'f_board':'class'}[document.querySelector('#f_board')?.id]||inferType());const x=collect(type,status);const required={class:['name'],chapter:['name','classId'],topic:['name','chapterId'],formula:['name','equation','chapterId'],question:['prompt','chapterId','answer'],file:['title'],solver:['title','prompt']};if((required[type]||[]).some(k=>x[k]===''||x[k]===undefined)){toast('Please complete the required fields.','error');return}
+const arr=({class:'classes',chapter:'chapters',topic:'topics',formula:'formulas',question:'questions',file:'files',solver:'solver'})[type];const i=db[arr].findIndex(z=>z.id===x.id);if(i>=0)db[arr][i]=x;else db[arr].push(x);saveDB();log((i>=0?'Updated ':'Created ')+type,x.name||x.title||x.prompt||'content');closeModal();render();toast(status==='Published'?'Content published in this local prototype.':'Draft saved locally.')}
+
+function inferType(){const title=document.getElementById('modalTitle').textContent.toLowerCase();if(title.includes('class'))return'class';if(title.includes('chapter'))return'chapter';if(title.includes('topic'))return'topic';if(title.includes('formula'))return'formula';if(title.includes('question'))return'question';if(title.includes('notes'))return'file';return'solver'}
+function editItem(type,itemId){const arr=({class:'classes',chapter:'chapters',topic:'topics',formula:'formulas',question:'questions',file:'files',solver:'solver'})[type];const x=db[arr].find(z=>z.id===itemId);if(x)openModal(type,x)}
+
+function deleteItem(type,itemId){if(!confirm('Delete this item? This cannot be undone.'))return;const arr=({class:'classes',chapter:'chapters',topic:'topics',formula:'formulas',question:'questions',file:'files',solver:'solver'})[type];db[arr]=db[arr].filter(x=>x.id!==itemId);if(type==='class'){const ids=db.chapters.filter(x=>x.classId===itemId).map(x=>x.id);db.chapters=db.chapters.filter(x=>x.classId!==itemId);db.topics=db.topics.filter(x=>!ids.includes(x.chapterId));db.formulas=db.formulas.filter(x=>!ids.includes(x.chapterId));db.questions=db.questions.filter(x=>!ids.includes(x.chapterId));db.files=db.files.filter(x=>!ids.includes(x.chapterId));db.solver=db.solver.filter(x=>!ids.includes(x.chapterId))}
+if(type==='chapter'){for(const a of ['topics','formulas','questions','files','solver'])db[a]=db[a].filter(x=>x.chapterId!==itemId)}
+saveDB();log('Deleted '+type,'item removed');render();toast('Item deleted.')}
+
+function exportJSON(){const blob=new Blob([JSON.stringify({app:'MathX Admin Studio',version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mathx-content-backup.json';a.click();URL.revokeObjectURL(a.href);toast('JSON export downloaded.')}
+
+function importJSON(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const obj=JSON.parse(r.result);const data=obj.data||obj;if(!data.classes||!data.chapters)throw Error('Invalid format');if(!confirm('Import will replace all current local content. Continue?'))return;db={...structuredClone(seed),...data};saveDB();render();toast('Data imported successfully.')}catch(err){toast('Could not import this JSON file.','error')}e.target.value=''};r.readAsText(f)}
+
+function resetData(){if(!confirm('This will permanently clear all MathX prototype data saved in this browser. Export a backup first if needed. Continue?'))return;db=structuredClone(seed);saveDB();render();toast('Prototype data reset.')}
+
+/* ==================== SUPABASE ADMIN AUTH ==================== */
+
+const sb=window.mathxSupabase;
+
+function showLogin(message=''){
+ document.getElementById('loginScreen').style.display='flex';
+ document.getElementById('adminApp').classList.remove('authenticated');
+ document.getElementById('loginError').textContent=message;
+ document.getElementById('loginButton').disabled=false;
+ document.getElementById('loginButton').textContent='Sign in to Admin Studio →';
+ document.getElementById('logoutButton').style.display='none';
+}
+
+async function verifyAdmin(user){
+ if(!sb)throw new Error('Supabase client not found. Check supabase-config.js.');
+
+ const {data,error}=await sb
+  .from('admin_users')
+  .select('user_id')
+  .eq('user_id',user.id)
+  .maybeSingle();
+
+ if(error)throw error;
+ if(!data)throw new Error('This account is not authorised as a MathX admin.');
+ return true;
+}
+
+async function openAdmin(user){
+ await verifyAdmin(user);
+ document.getElementById('loginScreen').style.display='none';
+ document.getElementById('adminApp').classList.add('authenticated');
+ document.getElementById('logoutButton').style.display='inline-block';
+ render();
+}
+
+async function adminLogin(e){
+ e.preventDefault();
+
+ const email=document.getElementById('loginEmail').value.trim();
+ const password=document.getElementById('loginPassword').value;
+ const button=document.getElementById('loginButton');
+ const errorBox=document.getElementById('loginError');
+
+ button.disabled=true;
+ button.textContent='Verifying account...';
+ errorBox.textContent='';
+
+ try{
+  if(!sb)throw new Error('Supabase client not found. Check your configuration file.');
+
+  const {data,error}=await sb.auth.signInWithPassword({
+   email:email,
+   password:password
+  });
+
+  if(error)throw error;
+  if(!data.user)throw new Error('Login failed. Please try again.');
+
+  await openAdmin(data.user);
+  document.getElementById('loginPassword').value='';
+  toast('Welcome to MathX Admin Studio!');
+ }catch(err){
+  if(sb){
+   try{await sb.auth.signOut()}catch(signOutError){}
+  }
+  showLogin(err.message||'Unable to sign in. Please try again.');
+ }finally{
+  if(document.getElementById('adminApp').classList.contains('authenticated')){
+   button.disabled=false;
+   button.textContent='Sign in to Admin Studio →';
+  }
+ }
+}
+
+async function adminLogout(){
+ if(!sb)return;
+ const button=document.getElementById('logoutButton');
+ button.disabled=true;
+ button.textContent='Signing out...';
+
+ try{
+  const {error}=await sb.auth.signOut();
+  if(error)throw error;
+  document.getElementById('loginPassword').value='';
+  document.getElementById('loginEmail').value='';
+  showLogin('You have been signed out.');
+ }catch(err){
+  toast(err.message||'Could not sign out.','error');
+  button.disabled=false;
+  button.textContent='Logout ↗';
+ }
+}
+
+async function initAuth(){
+ showLogin();
+
+ if(!sb){
+  showLogin('Supabase configuration was not loaded. Check supabase-config.js.');
+  return;
+ }
+
+ try{
+  const {data,error}=await sb.auth.getSession();
+  if(error)throw error;
+
+  if(data.session?.user){
+   await openAdmin(data.session.user);
+  }else{
+   showLogin();
+  }
+ }catch(err){
+  showLogin(err.message||'Could not verify your session.');
+ }
+}
+
+document.getElementById('loginForm').addEventListener('submit',adminLogin);
+document.getElementById('logoutButton').addEventListener('click',adminLogout);
+
+initAuth();
+</script>
+</body>
+</html>
